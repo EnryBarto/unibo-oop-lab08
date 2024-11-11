@@ -1,5 +1,6 @@
 package it.unibo.mvc;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -29,8 +30,15 @@ public class MiniGUI {
     public MiniGUI() {
         final JPanel canvas = new JPanel();
         canvas.setLayout(new BorderLayout());
+        /*
+         * Part 1
+         */
+        final JPanel innerCanvas = new JPanel();
+        final BoxLayout layout = new BoxLayout(innerCanvas, BoxLayout.X_AXIS);
+        innerCanvas.setLayout(layout);
+        canvas.add(innerCanvas, BorderLayout.CENTER);
         final JButton write = new JButton("Print a random number on standard output");
-        canvas.add(write, BorderLayout.CENTER);
+        innerCanvas.add(write);
         frame.setContentPane(canvas);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         /*
