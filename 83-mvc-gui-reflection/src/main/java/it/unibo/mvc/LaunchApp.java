@@ -1,15 +1,23 @@
 package it.unibo.mvc;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import it.unibo.mvc.api.DrawNumberController;
+import it.unibo.mvc.api.DrawNumberView;
 import it.unibo.mvc.controller.DrawNumberControllerImpl;
 import it.unibo.mvc.model.DrawNumberImpl;
-import it.unibo.mvc.view.DrawNumberStdoutView;
-import it.unibo.mvc.view.DrawNumberSwingView;
 
 /**
  * Application entry-point.
  */
 public final class LaunchApp {
+
+    private final static int VIEWS_NUMBER = 3;
+    private final static String SWING_VIEW_CLASSNAME = "it.unibo.mvc.view.DrawNumberStdoutView";
+    private final static String STDOUT_VIEW_CLASSNAME = "it.unibo.mvc.view.DrawNumberSwingView";
 
     private LaunchApp() { }
 
@@ -27,8 +35,32 @@ public final class LaunchApp {
     public static void main(final String... args) {
         final var model = new DrawNumberImpl();
         final DrawNumberController app = new DrawNumberControllerImpl(model);
-        app.addView(new DrawNumberSwingView());
-        app.addView(new DrawNumberSwingView());
-        app.addView(new DrawNumberStdoutView());
+        // Load the view classes via reflection and get all the constructors
+        final Collection<Class<?>> viewClasses = new ArrayList<>();
+        for (String className: new String[]{SWING_VIEW_CLASSNAME, STDOUT_VIEW_CLASSNAME}) {
+            try {
+                viewClasses.add(Class.forName(className)); 
+            } catch (ClassNotFoundException e) {
+                System.err.println(e);
+            }
+        }
+        final Collection<Constructor<?>[]> constructors = new ArrayList<>();
+        for (Class<?> c: viewClasses) {
+            constructors.add(c.getConstructors());
+        }
+        // For every array of constructors, find and launch the 0-ary constructor
+        for (Constructor<?>[] constructorsArray: constructors) {
+            for (Constructor<?> c: constructorsArray) {
+                if (c.getParameterCount() == 0) {
+                    try {
+                        for (int i = 0; i < VIEWS_NUMBER; i++) {
+                            app.addView((DrawNumberView)c.newInstance());
+                        }
+                    } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                        System.err.println(e);
+                    }
+                } 
+            }
+        }
     }
 }
