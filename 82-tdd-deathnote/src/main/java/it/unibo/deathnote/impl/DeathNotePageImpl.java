@@ -10,6 +10,7 @@ import it.unibo.deathnote.api.DeathNotePage;
 public class DeathNotePageImpl implements DeathNotePage {
     private final String name;
     private final long startTime;
+    private long causeTime;
     private String deathCause;
     private String deathDetails;
 
@@ -22,6 +23,7 @@ public class DeathNotePageImpl implements DeathNotePage {
         Objects.requireNonNull(name);
         this.name = name;
         this.startTime = System.currentTimeMillis();
+        this.causeTime = System.currentTimeMillis();
         this.deathCause = DeathNoteImplementation.DEFAULT_DEATH_CAUSE;
         this.deathDetails = DeathNoteImplementation.DEFAULT_DEATH_DETAILS;
     }
@@ -45,6 +47,7 @@ public class DeathNotePageImpl implements DeathNotePage {
     public boolean setDeathCause(String deathCause) {
         if (System.currentTimeMillis() - this.startTime <= DeathNoteImplementation.MAX_CAUSE_WAITING_TIME) {
             this.deathCause = deathCause;
+            this.causeTime = System.currentTimeMillis();
             return true;
         } else {
             return false;
@@ -58,7 +61,7 @@ public class DeathNotePageImpl implements DeathNotePage {
 
     @Override
     public boolean setDeathDetails(String deathDetails) {
-        if (System.currentTimeMillis() - this.startTime <= DeathNoteImplementation.MAX_DETAILS_WAITING_TIME) {
+        if (System.currentTimeMillis() - this.causeTime <= DeathNoteImplementation.MAX_DETAILS_WAITING_TIME) {
             this.deathDetails = deathDetails;
             return true;
         } else {
